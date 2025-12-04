@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Performance Dashboard</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid #888;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Performance Order & Sales</h2>
+<table id="table"></table>
+
+<script>
+// link CSV
+const csvUrl = "https://raw.githubusercontent.com/nicodemusarruan-ctrl/performance-dashboard/main/performance_sales.csv";
+
+fetch(csvUrl)
+  .then(response => response.text())
+  .then(data => {
+    const rows = data.trim().split("\n").map(r => r.split(","));
+    let html = "<tr>" + rows[0].map(v => "<th>"+v+"</th>").join("") + "</tr>";
+    for(let i=1; i<rows.length; i++){
+      html += "<tr>" + rows[i].map(v => "<td>"+v+"</td>").join("") + "</tr>";
+    }
+    document.getElementById("table").innerHTML = html;
+  })
+</script>
+
+</body>
+</html>
