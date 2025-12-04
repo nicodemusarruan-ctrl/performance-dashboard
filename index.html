@@ -1,7 +1,7 @@
 <script>
-  // Format angka pakai titik ribuan
+  // Format angka pakai titik ribuan (Indonesia)
   function formatNumber(num) {
-    return Number(num).toLocaleString('en-US');
+    return Number(num).toLocaleString('id-ID');
   }
 
   // Format persen
@@ -15,8 +15,10 @@
       let rows = data.trim().split('\n').map(r => r.split(','));
       let table = document.getElementById('dataTable');
 
-      // ====== HEADER TAMBAHAN ======
+      // Header dari CSV
       let header = rows[0];
+
+      // Tambahkan kolom baru
       header.push("Order %", "Sales %", "Gap Order", "Gap Sales");
 
       // Draw Header
@@ -28,7 +30,7 @@
       });
       table.appendChild(thead);
 
-      // ===== DATA ROW =====
+      // Draw Data
       for (let i = 1; i < rows.length; i++) {
         let row = rows[i];
         let tr = document.createElement('tr');
@@ -40,11 +42,13 @@
         let order = Number(row[4]);
         let sales = Number(row[5]);
 
+        // Hitung nilai
         let orderPercent = (order / target) * 100;
         let salesPercent = (sales / target) * 100;
         let gapOrder = target - order;
         let gapSales = target - sales;
 
+        // Data final tampil
         let rowData = [
           name,
           code,
