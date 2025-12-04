@@ -1,45 +1,35 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 30px;
-  background: #f6f7f8;
+  padding: 20px;
 }
 
 h2 {
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: #212529;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 th {
-  background: #2d2f33;
+  background: #007bff;
   color: white;
-  padding: 12px;
-  text-align: left;
-  font-size: 14px;
-  text-transform: uppercase;
+  padding: 8px;
 }
 
 td {
-  padding: 12px;
-  border-bottom: 1px solid #e3e3e3;
-  font-size: 14px;
+  padding: 6px;
+  border-bottom: 1px solid #ddd;
 }
 
-tr:hover {
-  background: #f7f7f7;
-}
-
-td.num {
+td:nth-child(4),
+td:nth-child(5),
+td:nth-child(6),
+td:nth-child(7),
+td:nth-child(8),
+td:nth-child(9),
+td:nth-child(10) {
   text-align: right;
-  font-weight: 600;
-  color: #111;
 }
