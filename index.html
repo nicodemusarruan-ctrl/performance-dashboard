@@ -1,138 +1,55 @@
-<link rel="stylesheet" href="style.css">
-
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Performance Dashboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f8f9fa;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .summary-box {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 25px;
-    }
-    .box {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0px 1px 4px rgba(0,0,0,0.1);
-      width: 30%;
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: center;
-    }
-    th {
-      background: #343a40;
-      color: white;
-    }
-    .green { color: #28a745; font-weight: bold; }
-    .red { color: #dc3545; font-weight: bold; }
-  </style>
+  <title>Dashboard Performance Sales</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <h2>Dashboard Performance Sales</h2>
 
-<h1>Performance Order & Sales</h1>
-
-<div class="summary-box">
-  <div class="box">
-    <h3>Total Target</h3>
-    <div id="totalTarget"></div>
-  </div>
-  <div class="box">
-    <h3>Total Order</h3>
-    <div id="totalOrder"></div>
-  </div>
-  <div class="box">
-    <h3>Total Sales</h3>
-    <div id="totalSales"></div>
-  </div>
-</div>
-
-<table id="table"></table>
+  <table id="dataTable">
+  </table>
 
 <script>
-function format(num){
-  return Number(num).toLocaleString('en-US');
-}
+  // Format angka pakai koma
+  function formatNumber(num) {
+    return Number(num).toLocaleString('en-US');
+  }
 
-fetch('performance_sales.csv')
-.then(r => r.text())
-.then(text => {
-  let rows = text.trim().split('\n').map(x => x.split(','));
-  let table = document.getElementById('table');
+  // Load CSV
+  fetch('performance_sales.csv')
+    .then(response => response.text())
+    .then(data => {
+      let rows = data.trim().split('\n').map(r => r.split(','));
+      let table = document.getElementById('dataTable');
 
-  // Header + extra columns
-  let header = rows[0];
-  header.push('% Order','% Sales','Gap Order','Gap Sales');
-  let thead = document.createElement('tr');
-  header.forEach(h=>{
-    let th=document.createElement('th');
-    th.textContent=h;
-    thead.appendChild(th);
-  });
-  table.appendChild(thead);
+      rows.forEach((row, i) => {
+        let tr = document.createElement('tr');
 
-  let totalTarget = 0, totalOrder = 0, totalSales = 0;
+        row.forEach((cell, j) => {
+          let tag = (i === 0) ? 'th' : 'td';
+          let el = document.createElement(tag);
 
-  rows.slice(1).forEach(row => {
-    let target = Number(row[3]);
-    let order = Number(row[4]);
-    let sales = Number(row[5]);
+          // Header langsung isi text
+          if (i === 0) {
+            el.textContent = cell;
+          } else {
+            // Kolom angka mulai index 3 (Target sampai akhir)
+            if (j >= 3) {
+              el.textContent = formatNumber(cell);
+              el.classList.add("num");
+            } else {
+              el.textContent = cell;
+            }
+          }
+          tr.appendChild(el);
+        });
 
-    let pOrder = (order/target*100).toFixed(1);
-    let pSales = (sales/target*100).toFixed(1);
-    let gapOrder = target-order;
-    let gapSales = target-sales;
-
-    totalTarget += target;
-    totalOrder += order;
-    totalSales += sales;
-
-    row.push(pOrder,pSales,gapOrder,gapSales);
-
-    let tr = document.createElement('tr');
-    row.forEach((cell,i)=>{
-      let td=document.createElement('td');
-
-      // Format angka kolom 4+
-      if(i>=3){
-        td.textContent = format(cell);
-      } else {
-        td.textContent = cell;
-      }
-
-      if(i==6){ td.className = pOrder>=100?"green":"red"; }
-      if(i==7){ td.className = pSales>=100?"green":"red"; }
-
-      tr.appendChild(td);
+        table.appendChild(tr);
+      });
     });
-    table.appendChild(tr);
-  });
-
-  document.getElementById('totalTarget').textContent = format(totalTarget);
-  document.getElementById('totalOrder').textContent = format(totalOrder);
-  document.getElementById('totalSales').textContent = format(totalSales);
-});
 </script>
 
 </body>
