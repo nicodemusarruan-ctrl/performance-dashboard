@@ -1,5 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Performance Sales</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h2>Dashboard Performance Sales</h2>
+
+  <table id="dataTable"></table>
+
 <script>
-  // Format angka pakai titik ribuan (Indonesia)
+  // Format angka ribuan
   function formatNumber(num) {
     return Number(num).toLocaleString('id-ID');
   }
@@ -10,65 +23,61 @@
   }
 
   fetch('performance_sales.csv')
-    .then(response => response.text())
-    .then(data => {
-      let rows = data.trim().split('\n').map(r => r.split(','));
+    .then(res => res.text())
+    .then(text => {
+      let lines = text.trim().split('\n');
       let table = document.getElementById('dataTable');
 
-      // Header dari CSV
-      let header = rows[0];
+      // ====== HEADER ======
+      let header = lines[0].split(',');
+      header.push("Order %","Sales %","Gap Order","Gap Sales");
 
-      // Tambahkan kolom baru
-      header.push("Order %", "Sales %", "Gap Order", "Gap Sales");
-
-      // Draw Header
-      let thead = document.createElement('tr');
+      let tr = document.createElement('tr');
       header.forEach(h => {
         let th = document.createElement('th');
         th.textContent = h;
-        thead.appendChild(th);
+        tr.appendChild(th);
       });
-      table.appendChild(thead);
+      table.appendChild(tr);
 
-      // Draw Data
-      for (let i = 1; i < rows.length; i++) {
-        let row = rows[i];
-        let tr = document.createElement('tr');
+      // ====== DATA ======
+      for(let i=1;i<lines.length;i++){
+        let row = lines[i].split(',');
 
-        let name = row[0];
+        let nama = row[0];
         let code = row[1];
-        let custname = row[2];
+        let cust = row[2];
         let target = Number(row[3]);
         let order = Number(row[4]);
         let sales = Number(row[5]);
 
-        // Hitung nilai
-        let orderPercent = (order / target) * 100;
-        let salesPercent = (sales / target) * 100;
+        let orderPct = (order/target)*100;
+        let salesPct = (sales/target)*100;
         let gapOrder = target - order;
         let gapSales = target - sales;
 
-        // Data final tampil
-        let rowData = [
-          name,
+        let data = [
+          nama,
           code,
-          custname,
+          cust,
           formatNumber(target),
           formatNumber(order),
-          formatPercent(orderPercent),
+          formatPercent(orderPct),
           formatNumber(sales),
-          formatPercent(salesPercent),
+          formatPercent(salesPct),
           formatNumber(gapOrder),
           formatNumber(gapSales)
         ];
 
-        rowData.forEach(val => {
+        let tr = document.createElement('tr');
+        data.forEach(v => {
           let td = document.createElement('td');
-          td.textContent = val;
+          td.textContent = v;
           tr.appendChild(td);
         });
-
         table.appendChild(tr);
       }
     });
 </script>
+</body>
+</html>
