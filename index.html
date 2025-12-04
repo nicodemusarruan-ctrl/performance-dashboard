@@ -1,56 +1,70 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard Performance Sales</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-  <h2>Dashboard Performance Sales</h2>
-
-  <table id="dataTable">
-  </table>
-
 <script>
-  // Format angka pakai koma
+  // Format angka pakai titik ribuan
   function formatNumber(num) {
     return Number(num).toLocaleString('en-US');
   }
 
-  // Load CSV
+  // Format persen
+  function formatPercent(num) {
+    return num.toFixed(2) + "%";
+  }
+
   fetch('performance_sales.csv')
     .then(response => response.text())
     .then(data => {
       let rows = data.trim().split('\n').map(r => r.split(','));
       let table = document.getElementById('dataTable');
 
-      rows.forEach((row, i) => {
+      // ====== HEADER TAMBAHAN ======
+      let header = rows[0];
+      header.push("Order %", "Sales %", "Gap Order", "Gap Sales");
+
+      // Draw Header
+      let thead = document.createElement('tr');
+      header.forEach(h => {
+        let th = document.createElement('th');
+        th.textContent = h;
+        thead.appendChild(th);
+      });
+      table.appendChild(thead);
+
+      // ===== DATA ROW =====
+      for (let i = 1; i < rows.length; i++) {
+        let row = rows[i];
         let tr = document.createElement('tr');
 
-        row.forEach((cell, j) => {
-          let tag = (i === 0) ? 'th' : 'td';
-          let el = document.createElement(tag);
+        let name = row[0];
+        let code = row[1];
+        let custname = row[2];
+        let target = Number(row[3]);
+        let order = Number(row[4]);
+        let sales = Number(row[5]);
 
-          // Header langsung isi text
-          if (i === 0) {
-            el.textContent = cell;
-          } else {
-            // Kolom angka mulai index 3 (Target sampai akhir)
-            if (j >= 3) {
-              el.textContent = formatNumber(cell);
-              el.classList.add("num");
-            } else {
-              el.textContent = cell;
-            }
-          }
-          tr.appendChild(el);
+        let orderPercent = (order / target) * 100;
+        let salesPercent = (sales / target) * 100;
+        let gapOrder = target - order;
+        let gapSales = target - sales;
+
+        let rowData = [
+          name,
+          code,
+          custname,
+          formatNumber(target),
+          formatNumber(order),
+          formatPercent(orderPercent),
+          formatNumber(sales),
+          formatPercent(salesPercent),
+          formatNumber(gapOrder),
+          formatNumber(gapSales)
+        ];
+
+        rowData.forEach(val => {
+          let td = document.createElement('td');
+          td.textContent = val;
+          tr.appendChild(td);
         });
 
         table.appendChild(tr);
-      });
+      }
     });
 </script>
-
-</body>
-</html>
