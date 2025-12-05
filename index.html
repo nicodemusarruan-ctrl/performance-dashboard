@@ -1,83 +1,69 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard Performance Sales</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+document.addEventListener("DOMContentLoaded", function () {
 
-<body>
-  <h2>Dashboard Performance Sales</h2>
-
-  <table id="dataTable"></table>
-
-<script>
-  // Format angka ribuan
-  function formatNumber(num) {
-    return Number(num).toLocaleString('id-ID');
+  // --- Clean number biar aman format Indonesia ----
+  function cleanNum(str) {
+    if (!str) return 0;
+    return Number(String(str)
+      .replace(/\./g, "")     // 1.500.000 → 1500000
+      .replace(/,/g, "")      // 1,500,000 → 1500000
+      .trim()
+    ) || 0;
   }
 
-  // Format persen
-  function formatPercent(num) {
-    return num.toFixed(2) + "%";
+  // --- Baca CSV ---
+  function loadCSV(file, callback) {
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      let text = e.target.result;
+      let rows = text.split("\n").map(r => r.split(","));
+      callback(rows);
+    };
+    reader.readAsText(file);
   }
 
-  fetch('performance_sales.csv')
-    .then(res => res.text())
-    .then(text => {
-      let lines = text.trim().split('\n');
-      let table = document.getElementById('dataTable');
+  // --- Saat upload ---
+  document.getElementById("fileCSV").addEventListener("change", function (e) {
+    let file = e.target.files[0];
+    loadCSV(file, buildTable);
+  });
 
-      // ====== HEADER ======
-      let header = lines[0].split(',');
-      header.push("Order %","Sales %","Gap Order","Gap Sales");
+  // --- Build table ---
+  function buildTable(data) {
+    let tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "";
 
-      let tr = document.createElement('tr');
-      header.forEach(h => {
-        let th = document.createElement('th');
-        th.textContent = h;
-        tr.appendChild(th);
-      });
-      table.appendChild(tr);
+    for (let i = 1; i < data.length; i++) {   // skip header
+      let row = data[i];
+      if (row.length < 6) continue;          // kalau kolom kurang
 
-      // ====== DATA ======
-      for(let i=1;i<lines.length;i++){
-        let row = lines[i].split(',');
+      let nama = row[0];
+      let code = row[1];
+      let cust = row[2];
 
-        let nama = row[0];
-        let code = row[1];
-        let cust = row[2];
-        let target = Number(row[3]);
-        let order = Number(row[4]);
-        let sales = Number(row[5]);
+      let target = cleanNum(row[3]);
+      let order = cleanNum(row[4]);
+      let sales = cleanNum(row[5]);
 
-        let orderPct = (order/target)*100;
-        let salesPct = (sales/target)*100;
-        let gapOrder = target - order;
-        let gapSales = target - sales;
+      let orderPct = target > 0 ? ((order / target) * 100).toFixed(2) : 0;
+      let salesPct = target > 0 ? ((sales / target) * 100).toFixed(2) : 0;
 
-        let data = [
-          nama,
-          code,
-          cust,
-          formatNumber(target),
-          formatNumber(order),
-          formatPercent(orderPct),
-          formatNumber(sales),
-          formatPercent(salesPct),
-          formatNumber(gapOrder),
-          formatNumber(gapSales)
-        ];
+      let gapOrder = target - order;
+      let gapSales = target - sales;
 
-        let tr = document.createElement('tr');
-        data.forEach(v => {
-          let td = document.createElement('td');
-          td.textContent = v;
-          tr.appendChild(td);
-        });
-        table.appendChild(tr);
-      }
-    });
-</script>
-</body>
-</html>
+      let tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${nama}</td>
+        <td>${code}</td>
+        <td>${cust}</td>
+        <td>${target.toLocaleString()}</td>
+        <td>${order.toLocaleString()}</td>
+        <td>${orderPct}%</td>
+        <td>${sales.toLocaleString()}</td>
+        <td>${salesPct}%</td>
+        <td>${gapOrder.toLocaleString()}</td>
+        <td>${gapSales.toLocaleString()}</td>
+      `;
+      tableBody.appendChild(tr);
+    }
+  }
+});
